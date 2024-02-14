@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { FieldValues, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { ExpenseList } from "./ExpenseList";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod/dist/zod.js";
 
 const schema = z.object({
-  // figure out how to establish an id
   id: z.number(),
   description: z
     .string()
@@ -16,7 +15,7 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-export const ExpenseForm = () => {
+export const ExpenseForm: React.FC = () => {
   const {
     register,
     handleSubmit,
@@ -24,35 +23,31 @@ export const ExpenseForm = () => {
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
-  const [expenseListData, setExpenseListData] = useState<FieldValues[]>([]);
 
-  const onSubmit = (data: FieldValues, id: number) => {
-    const initialIdValue = 0;
-    const counter = initialIdValue + 1;
-    setExpenseListData((prevState) => [data, ...prevState]);
-    console.log(data);
-    console.log(counter);
-    console.log(id);
-    // figure out how to clear the input
-    // data = {
-    //     description: '',
-    //     amount: 0,
-    //     category: '',
-    // }
+  const [expenses, setExpenses] = useState<FormData[]>([
+    { id: 1, description: "Electric", amount: 20, category: "Utility" },
+    { id: 2, description: "Water Bill", amount: 20, category: "Utility" },
+    { id: 3, description: "Heat", amount: 20, category: "Utility" },
+    { id: 4, description: "Gas", amount: 20, category: "Utility" },
+  ]);
+
+  const onHandleSubmit = (data: FormData) => {
+    setExpenses([...expenses, { ...data }]);
+    console.log(data, expenses);
   };
 
   //   remove expense item
   const removeExpense = (id: number) => {
-    const removeExpenseData = expenseListData.filter((item) => item.id !== id);
-    setExpenseListData(removeExpenseData);
-    console.log(removeExpenseData);
+    const removeExpenseData = expenses.filter((item) => item.id !== id);
+    setExpenses(removeExpenseData);
+    console.log(id);
   };
 
   return (
     <>
       <form
         className='mb-5'
-        onSubmit={handleSubmit((data) => onSubmit(data, data.id))}>
+        onSubmit={handleSubmit((data) => onHandleSubmit(data))}>
         <div className='mb-4 w-100'>
           <label htmlFor='description' className='form-label'>
             Description
@@ -99,12 +94,11 @@ export const ExpenseForm = () => {
             <p className='text-danger'>{errors.category?.message}</p>
           )}
         </div>
-        <button className='btn btn-primary'>Submit</button>
+        <button className='btn btn-primary' type='submit'>
+          Submit
+        </button>
       </form>
-      <ExpenseList
-        expenseData={expenseListData}
-        removeExpense={removeExpense}
-      />
+      <ExpenseList expenseData={expenses} removeExpense={removeExpense} />
     </>
   );
 };
