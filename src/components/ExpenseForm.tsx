@@ -3,9 +3,10 @@ import { useForm } from "react-hook-form";
 import { ExpenseList } from "./ExpenseList";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod/dist/zod.js";
+import nextId from "react-id-generator";
 
 const schema = z.object({
-  id: z.number(),
+  id: z.string(),
   description: z
     .string()
     .min(3, { message: "Description must be at least 3 characters." }),
@@ -24,20 +25,25 @@ export const ExpenseForm: React.FC = () => {
     resolver: zodResolver(schema),
   });
 
+  const htmlId = nextId();
+
   const [expenses, setExpenses] = useState<FormData[]>([
-    { id: 1, description: "Electric", amount: 20, category: "Utility" },
-    { id: 2, description: "Water Bill", amount: 20, category: "Utility" },
-    { id: 3, description: "Heat", amount: 20, category: "Utility" },
-    { id: 4, description: "Gas", amount: 20, category: "Utility" },
+    { id: "1", description: "Electric", amount: 20, category: "Utility" },
+    // { id: 2, description: "Water Bill", amount: 20, category: "Utility" },
+    // { id: 3, description: "Heat", amount: 20, category: "Utility" },
+    // { id: 4, description: "Gas", amount: 20, category: "Utility" },
   ]);
 
   const onHandleSubmit = (data: FormData) => {
-    setExpenses([...expenses, { ...data }]);
-    console.log(data, expenses);
+    console.log(data);
+    console.log(htmlId);
+    // setExpenses([...expenses, { ...data, id: htmlId }]);
+    // console.log(data, expenses);
+    // console.log(htmlId);
   };
 
   //   remove expense item
-  const removeExpense = (id: number) => {
+  const removeExpense = (id: string) => {
     const removeExpenseData = expenses.filter((item) => item.id !== id);
     setExpenses(removeExpenseData);
     console.log(id);
@@ -54,7 +60,7 @@ export const ExpenseForm: React.FC = () => {
           </label>
           <input
             {...register("description")}
-            id='description'
+            name='description'
             type='text'
             className='form-control'
           />
@@ -68,7 +74,7 @@ export const ExpenseForm: React.FC = () => {
           </label>
           <input
             {...register("amount", { valueAsNumber: true })}
-            id='amount'
+            name='amount'
             type='number'
             className='form-control'
           />
@@ -82,7 +88,7 @@ export const ExpenseForm: React.FC = () => {
           </label>
           <select
             {...register("category")}
-            id='category'
+            name='category'
             className='form-control'>
             <option id='default'></option>
             <option id='All categories'>All categories</option>
@@ -94,9 +100,7 @@ export const ExpenseForm: React.FC = () => {
             <p className='text-danger'>{errors.category?.message}</p>
           )}
         </div>
-        <button className='btn btn-primary' type='submit'>
-          Submit
-        </button>
+        <input className='btn btn-primary' type='submit' />
       </form>
       <ExpenseList expenseData={expenses} removeExpense={removeExpense} />
     </>
