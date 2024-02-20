@@ -5,6 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod/dist/zod.js";
 import nextId from "react-id-generator";
 
+// model for form validation
 const schema = z.object({
   id: z.string(),
   description: z
@@ -20,33 +21,41 @@ export const ExpenseForm: React.FC = () => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
-  const htmlId = nextId();
+  const id = nextId();
 
-  const [expenses, setExpenses] = useState<FormData[]>([
-    { id: "1", description: "Electric", amount: 20, category: "Utility" },
-    // { id: 2, description: "Water Bill", amount: 20, category: "Utility" },
-    // { id: 3, description: "Heat", amount: 20, category: "Utility" },
-    // { id: 4, description: "Gas", amount: 20, category: "Utility" },
-  ]);
+  const [expenses, setExpenses] = useState<FormData[]>([]);
+  const [filterCategory, setFilterCategory] = useState<FormData[]>([]);
+  const [categoryValues, setCategoryValues] = useState<string>("");
 
+  // submit form
   const onHandleSubmit = (data: FormData) => {
-    console.log(data);
-    console.log(htmlId);
-    // setExpenses([...expenses, { ...data, id: htmlId }]);
-    // console.log(data, expenses);
-    // console.log(htmlId);
+    setExpenses([data, ...expenses]);
+    reset();
   };
 
-  //   remove expense item
+  //   remove expense and filtered items
   const removeExpense = (id: string) => {
     const removeExpenseData = expenses.filter((item) => item.id !== id);
     setExpenses(removeExpenseData);
-    console.log(id);
+    const removeDataFromFilterCategory = filterCategory.filter(
+      (item) => item.id !== id
+    );
+    setFilterCategory(removeDataFromFilterCategory);
+  };
+
+  // filter list based on the category
+  const filterListByCategory = (category: string) => {
+    const filteredList = expenses.filter(
+      (categoryItem) => categoryItem.category === category
+    );
+    setCategoryValues(category);
+    setFilterCategory(filteredList);
   };
 
   return (
@@ -89,9 +98,8 @@ export const ExpenseForm: React.FC = () => {
           <select
             {...register("category")}
             name='category'
-            className='form-control'>
+            className='form-select'>
             <option id='default'></option>
-            <option id='All categories'>All categories</option>
             <option id='Groceries'>Groceries</option>
             <option id='Utility'>Utility</option>
             <option id='Entertainment'>Entertainment</option>
@@ -100,9 +108,16 @@ export const ExpenseForm: React.FC = () => {
             <p className='text-danger'>{errors.category?.message}</p>
           )}
         </div>
+        <input {...register("id")} name={id} type='hidden' value={id} />
         <input className='btn btn-primary' type='submit' />
       </form>
-      <ExpenseList expenseData={expenses} removeExpense={removeExpense} />
+      <ExpenseList
+        expenseData={expenses}
+        removeExpense={removeExpense}
+        filterListByCategory={filterListByCategory}
+        filterCategory={filterCategory}
+        categoryValues={categoryValues}
+      />
     </>
   );
 };
