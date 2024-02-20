@@ -32,6 +32,7 @@ export const ExpenseForm: React.FC = () => {
   const [expenses, setExpenses] = useState<FormData[]>([]);
   const [filterCategory, setFilterCategory] = useState<FormData[]>([]);
   const [categoryValues, setCategoryValues] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // submit form
   const onHandleSubmit = (data: FormData) => {
@@ -49,6 +50,10 @@ export const ExpenseForm: React.FC = () => {
     setFilterCategory(removeDataFromFilterCategory);
   };
 
+  // Open and close the category
+  const handleCloseModal = () => setIsModalOpen(false);
+  const handleOpenModal = () => setIsModalOpen(true);
+
   // filter list based on the category
   const filterListByCategory = (category: string) => {
     const filteredList = expenses.filter(
@@ -56,6 +61,12 @@ export const ExpenseForm: React.FC = () => {
     );
     setCategoryValues(category);
     setFilterCategory(filteredList);
+    if (category === "All Categories") {
+      handleCloseModal();
+    } else {
+      expenses.every((categoryItem) => categoryItem.category !== category) &&
+        handleOpenModal();
+    }
   };
 
   return (
@@ -117,6 +128,9 @@ export const ExpenseForm: React.FC = () => {
         filterListByCategory={filterListByCategory}
         filterCategory={filterCategory}
         categoryValues={categoryValues}
+        handleCloseModal={handleCloseModal}
+        handleOpenModal={handleOpenModal}
+        isModalOpen={isModalOpen}
       />
     </>
   );
